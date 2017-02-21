@@ -1,7 +1,8 @@
 var state = {
   right: 0,
   wrong: 0,
-  questionTracker: 0
+  questionTracker: 0,
+  rightAnswer: null
 };
 
 var questions = [
@@ -35,23 +36,20 @@ var questions = [
 var isCorrect = function(state, answer) {
   if (parseInt(answer) === questions[state.questionTracker].correct) {
     state.right++;
+    state.rightAnswer = true;
   } else {
     state.wrong++;
+    state.rightAnswer = false;
   }
 };
 
-var renderCorrectFeedback = function (state, element) {
-  var html = '<h2>Great Job! Your answer was correct!</h2>';
-  if (state.questionTracker === questions.length - 1) {
-    html += '<form class="next"><button type="submit">How did I do?</button></form>';
+var renderFeedback = function(state, element) {
+  if (state.rightAnswer) {
+    var html = '<h2>Great Job! Your answer was correct!</h2>';
   } else {
-    html += '<form class="next"><button type="submit">Next Question</button></form>';
+    var html = '<h2>Sorry, your are incorrect. The correct answer is ' + 
+                questions[state.questionTracker].answers[questions[state.questionTracker].correct] + '</h2>';
   }
-  element.html(html);
-}
-
-var renderIncorrectFeedback = function(state, element) {
-  var html = '<h2>Sorry, your are incorrect. The correct answer is ' + questions[state.questionTracker].answers[questions[state.questionTracker].correct] + '</h2>';
   if (state.questionTracker === questions.length - 1) {
     html += '<form class="next"><button type="submit">How did I do?</button></form>';
   } else {
@@ -82,12 +80,7 @@ $(document).on("submit", ".question", function(event) {
   event.preventDefault();
   var answer = $('input[name=answer]:checked').val();
   isCorrect(state, answer);
-
-  if (parseInt(answer) === questions[state.questionTracker].correct) {
-    renderCorrectFeedback(state, $(".container"));
-  } else {
-    renderIncorrectFeedback(state, $(".container"));
-  }
+  renderFeedback(state, $(".container"));
 });
 
 $(document).on("submit", ".next", function(event) {
